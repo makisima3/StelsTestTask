@@ -1,33 +1,39 @@
 using Assets.Scripts.Utils;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 namespace Assets.Scripts
 {
     [RequireComponent(typeof(WaypointAgent))]
+    [RequireComponent(typeof(EnemyEyes))]
     public class EnemyController : MonoBehaviour
     {
         [SerializeField]
-        private float rotateSpeed;
+        private float rotateSpeed = 150f;
         [SerializeField]
-        private float movementSpeed = 5f;
+        private float movementSpeed = 1f;
 
         private WaypointAgent waypointAgent;
-
+        private EnemyEyes enemyEyes;
         private Tween mainTween;
 
         private void Awake()
         {
             waypointAgent = GetComponent<WaypointAgent>();
+            enemyEyes = GetComponent<EnemyEyes>();
 
             waypointAgent.OnPositionReached.AddListener(OnPosotionReached);
+            enemyEyes.OnPlayerVisible.AddListener(OnPlayerVisible);
         }
 
         private void OnPosotionReached(Waypoint waypoint)
         {
             RotateTo(waypoint.Point.position);
+        }
+
+        private void OnPlayerVisible(GameObject detectBy)
+        {
+            Debug.Log("Опа, ливер вылез!");
         }
 
         private void RotateTo(Vector3 target)
