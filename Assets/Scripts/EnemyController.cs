@@ -22,45 +22,60 @@ namespace Assets.Scripts
             waypointAgent = GetComponent<WaypointAgent>();
             enemyEyes = GetComponent<EnemyEyes>();
 
-            waypointAgent.OnPositionReached.AddListener(OnPosotionReached);
+            //подписка на события достижения точки и обнаружения игрока
+            waypointAgent.OnPositionReached.AddListener(OnPositionReached);
             enemyEyes.OnPlayerVisible.AddListener(OnPlayerVisible);
         }
 
-        private void OnPosotionReached(Waypoint waypoint)
+        private void OnPositionReached(Waypoint waypoint)
         {
             RotateTo(waypoint.Point.position);
         }
 
         private void OnPlayerVisible(GameObject detectBy)
         {
+            RotateTo(enemyEyes.Target.position, false);
+
+            GameManager.Instance.Lose();
+
             Debug.Log("Опа, ливер вылез!");
         }
 
-        private void RotateTo(Vector3 target)
+        // поворот к точке
+        private void RotateTo(Vector3 target, bool moveAfter = true)
         {
             var direction = (target - transform.position).normalized;
-            direction.y = 0.0f;
+            direction.y = 0f;
 
-            var angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg + 90f;
+            // перевод направления (в плоскости x z) в угол (y)
+            var angle = 90f - Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
 
-            if(mainTween != null)
+            if (mainTween != null)
             {
-                mainTween.Kill();
+                mainTween.Kill(); //прекращаем предыдущую анимацию если она есть
             }
 
-            mainTween = transform.DORotate(Vector3.up * angle, Mathf.Abs(angle - transform.eulerAngles.y) / rotateSpeed).SetEase(Ease.OutSine).OnComplete(() => MoveTo(target));
+            //поворот с нарастанием и затуханием. длительность расчитывается в зависимости от целевого угла
+            mainTween = transform.DORotate(Vector3.up * angle, Mathf.Abs(angle - transform.eulerAngles.y) / rotateSpeed).SetEase(Ease.OutSine);
+
+            if (moveAfter)
+            {
+                mainTween.OnComplete(() => MoveTo(target)); // начать движение после окончания поворота
+            }
         }
 
+        //начало движения к точке
         private void MoveTo(Vector3 target)
         {
             target.y = transform.position.y;
 
             if (mainTween != null)
             {
-                mainTween.Kill();
+                mainTween.Kill(); //прекращаем предыдущую анимацию если она есть
             }
 
-            mainTween = transform.DOMove(target, target.magnitude / movementSpeed ).SetEase(Ease.InOutSine);
+            //движение с нарастанием и затуханием. длительность расчитывается в зависимости от необходимой для прохождения дистанции
+            mainTween = transform.DOMove(target, target.magnitude / movementSpeed).SetEase(Ease.InOutSine); 
         }
     }
 }
