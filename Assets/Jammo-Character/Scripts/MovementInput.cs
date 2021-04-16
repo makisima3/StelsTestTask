@@ -9,6 +9,8 @@ using UnityEngine;
 public class MovementInput : MonoBehaviour {
 
     public float Velocity;
+	[SerializeField]
+	private Joystick joystick;
     [Space]
 
 	public float InputX;
@@ -63,10 +65,11 @@ public class MovementInput : MonoBehaviour {
     }
 
     void PlayerMoveAndRotation() {
-		InputX = Input.GetAxis ("Horizontal");
-		InputZ = Input.GetAxis ("Vertical");
+		//InputX = Input.GetAxis ("Horizontal");
+		//InputZ = Input.GetAxis ("Vertical");
+		InputX = joystick.Horizontal;
+		InputZ = joystick.Vertical;
 
-		var camera = Camera.main;
 		var forward = cam.transform.forward;
 		var right = cam.transform.right;
 
@@ -103,8 +106,8 @@ public class MovementInput : MonoBehaviour {
 
 	void InputMagnitude() {
 		//Calculate Input Vectors
-		InputX = Input.GetAxis ("Horizontal");
-		InputZ = Input.GetAxis ("Vertical");
+		InputX = joystick.Horizontal;
+		InputZ = joystick.Vertical;
 
 		//anim.SetFloat ("InputZ", InputZ, VerticalAnimTime, Time.deltaTime * 2f);
 		//anim.SetFloat ("InputX", InputX, HorizontalAnimSmoothTime, Time.deltaTime * 2f);
